@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1032189488610",
+    "project_id": "administracionsistemas-398813",
+    "storage_bucket": "administracionsistemas-398813.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1032189488610:android:f3c53ffd0f5d56c40f1dbb",
+        "android_client_info": {
+          "package_name": "com.example.das_proyecto2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBqfepQPepd4Etcshpnpx5LEwdPhEUVboY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
