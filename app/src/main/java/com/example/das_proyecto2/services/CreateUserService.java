@@ -1,4 +1,4 @@
-package com.example.das_proyecto2.workers;
+package com.example.das_proyecto2.services;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -16,8 +16,8 @@ public class CreateUserService extends AsyncTask<String, Void, String> {
     protected String doInBackground(String... params) {
         String apiUrl = params[0]; // URL of the Python API
         String email = params[1];
-        String password = params[2];
-        return postRequest(apiUrl, email, password);
+        String token = params[2];
+        return postRequest(apiUrl, email, token);
     }
 
     @Override
@@ -27,7 +27,7 @@ public class CreateUserService extends AsyncTask<String, Void, String> {
         Log.d("ApiService", "Response from server: " + result);
     }
 
-    private String postRequest(String urlString, String email, String password) {
+    private String postRequest(String urlString, String email, String token) {
         HttpURLConnection urlConnection = null;
         try {
             URL url = new URL(urlString);
@@ -37,7 +37,7 @@ public class CreateUserService extends AsyncTask<String, Void, String> {
             urlConnection.setRequestProperty("Content-Type", "application/json");
 
             // Create the data
-            String jsonInputString = "{\"email\": \"" + email + "\", \"password\": \"" + password + "\"}";
+            String jsonInputString = "{\"email\": \"" + email + "\", \"token\": \"" + token + "\"}";
 
             // Send the POST out
             try (DataOutputStream os = new DataOutputStream(urlConnection.getOutputStream())) {

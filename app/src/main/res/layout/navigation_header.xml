@@ -14,14 +14,14 @@
         android:layout_marginLeft="16dp"
         android:layout_marginBottom="8dp"/>
 
-    <TextView
+   <!--<TextView
         android:id="@+id/navUsername"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Nombre de Usuario"
         android:textSize="20sp"
         android:textColor="@android:color/white"
-        android:layout_marginLeft="16dp"/>
+        android:layout_marginLeft="16dp"/>-->
 
     <TextView
         android:id="@+id/navEmail"

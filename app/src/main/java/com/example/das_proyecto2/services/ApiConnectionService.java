@@ -1,4 +1,4 @@
-package com.example.das_proyecto2.workers;
+package com.example.das_proyecto2.services;
 
 import android.content.Context;
 import android.net.Uri;
@@ -9,13 +9,8 @@ import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;

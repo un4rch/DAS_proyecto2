@@ -1,7 +1,5 @@
 package com.example.das_proyecto2.activities;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -16,7 +14,6 @@ import com.example.das_proyecto2.adapters.ItemAdapter;
 import com.example.das_proyecto2.items.Item;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -24,29 +21,31 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.os.Bundle;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.widget.Toast;
+
 import com.example.das_proyecto2.R;
 import com.example.das_proyecto2.SessionManager;
-import com.example.das_proyecto2.workers.UploadImageService;
+import com.example.das_proyecto2.services.FetchImagesService;
+import com.example.das_proyecto2.services.UploadImageService;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
-public class HomeActivity extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity implements FetchImagesService.OnImagesFetchedListener {
     SessionManager sessionManager;
     DrawerLayout drawerLayout;
     NavigationView navigationView;
@@ -54,6 +53,7 @@ public class HomeActivity extends AppCompatActivity {
     static final int REQUEST_IMAGE_CAPTURE = 1;
     String currentPhotoPath;
     String userEmail;
+    List<Item> itemList;
 
 
     @Override
@@ -125,7 +125,7 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (ContextCompat.checkSelfPermission(HomeActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(HomeActivity.this, new String[] { Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE }, 100);
+                    ActivityCompat.requestPermissions(HomeActivity.this, new String[] { Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.POST_NOTIFICATIONS }, 100);
                 } else {
                     openCamera();
                 }
@@ -133,14 +133,47 @@ public class HomeActivity extends AppCompatActivity {
         });
 
         // RecyclerView with images
-        List<Item> items = new ArrayList<>();
-        // Add items to the list
-        items.add(new Item("http://ip:8000/get_imgs/image1.jpg", "Item 1"));
-        items.add(new Item("http://ip:8000/get_imgs/image2.jpg", "Item 2"));
+        new FetchImagesService(this).execute();
+    }
+
+    @Override
+    public void onImagesFetched(JSONArray images) {
+        this.itemList = null;
+        if (images != null) {
+            this.itemList = new ArrayList<>();
+            try {
+                for (int i = 0; i < images.length() && i < 10; i++) {
+                    JSONObject imageInfo = images.getJSONObject(i);
+                    String email = imageInfo.getString("email");
+                    String filename = imageInfo.getString("filename");
+                    int likes = imageInfo.getInt("likes");
+                    this.itemList.add(new Item(filename, likes));
+                    //this.itemList.add(new Item(filename, likes));
+
+                    // Here you could update your UI or handle the data as needed
+                    Log.i("HomeActivity", "Email: " + email + ", Filename: " + filename + ", Likes: " + likes);
+                }
+            } catch (Exception e) {
+                Log.e("HomeActivity", "Error parsing JSON", e);
+            }
+        } else {
+            Log.e("HomeActivity", "Received empty response");
+        }
         // Initialize RecyclerView
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(new ItemAdapter(this, items));
+        // TODO: Arreglar esta llamada ya que se peta al intentar renderizar las imagenes con ItemAdapter
+        //recyclerView.setAdapter(new ItemAdapter(this, this.itemList));
+        if (this.itemList != null) {
+            recyclerView.setAdapter(new ItemAdapter(this, this.itemList));
+            Log.d("HomeActivity", "Size: "+itemList.size());
+        }
+    }
+
+    @Override
+    public void onError(String error) {
+        // Handle errors - show message or log
+        Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -167,6 +200,9 @@ public class HomeActivity extends AppCompatActivity {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             new UploadImageService().execute("http://34.136.205.220:8000/upload_img", userEmail, currentPhotoPath);
         }
+        Intent intent = getIntent(); // Obtiene el Intent que inició la actividad actual
+        finish(); // Finaliza la actividad actual
+        startActivity(intent); // Inicia la actividad nuevamente con el mismo Intent
     }
 
     private void openCamera() {
